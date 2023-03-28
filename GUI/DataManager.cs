@@ -17,6 +17,7 @@ namespace excel2json.GUI
         // 导出数据
         private JsonExporter mJson;
         private CSDefineGenerator mCSharp;
+        private GoDefineGenerator mGo;
 
         /// <summary>
         /// 导出的Json文本
@@ -34,6 +35,17 @@ namespace excel2json.GUI
             get {
                 if (mCSharp != null)
                     return mCSharp.code;
+                else
+                    return "";
+            }
+        }
+
+        public string GoCode
+        {
+            get
+            {
+                if (mGo != null)
+                    return mGo.code;
                 else
                     return "";
             }
@@ -93,10 +105,13 @@ namespace excel2json.GUI
             ExcelLoader excel = new ExcelLoader(excelPath, header);
 
             //-- C# 结构体定义
-            mCSharp = new CSDefineGenerator(excelPath, excel, options.ExcludePrefix);
+            mCSharp = new CSDefineGenerator(excelPath, excel, options.IncludePrefix);
 
             //-- 导出JSON
-            mJson = new JsonExporter(excel, options.Lowcase, options.ExportArray, options.DateFormat, options.ForceSheetName, header, options.ExcludePrefix, options.CellJson, options.AllString);
+            mJson = new JsonExporter(excel, options.Lowcase, options.ExportArray, options.DateFormat, options.ForceSheetName, header, options.IncludePrefix, options.CellJson, options.AllString);
+
+            //-- Go 结构体定义
+            mGo = new GoDefineGenerator(excelPath, excel, options.IncludePrefix);
         }
     }
 }

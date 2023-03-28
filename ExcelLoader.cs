@@ -41,10 +41,10 @@ namespace excel2json {
                 // Gets or sets a value indicating whether to use a row from the 
                 // data as column names.
                 UseHeaderRow = true,
-
                 // Gets or sets a callback to determine whether to include the 
                 // current row in the DataTable.
-                //FilterRow = (rowReader) => {
+                //FilterRow = (rowReader) =>
+                //{
                 //    return rowReader.Depth > headerRow - 1;
                 //},
             };

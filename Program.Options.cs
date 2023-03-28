@@ -13,7 +13,7 @@ namespace excel2json
         {
             public Options()
             {
-                this.HeaderRows = 3;
+                this.HeaderRows = 4;
                 this.Encoding = "utf8-nobom";
                 this.Lowcase = false;
                 this.ExportArray = false;
@@ -34,6 +34,12 @@ namespace excel2json
 
             [Option('p', "csharp", Required = false, HelpText = "export C# data struct code file path.")]
             public string CSharpPath {
+                get;
+                set;
+            }
+            [Option('g', "go", Required = false, HelpText = "export Golang data struct code file path.")]
+            public string GoPath
+            {
                 get;
                 set;
             }
@@ -74,8 +80,8 @@ namespace excel2json
                 set;
             }
 
-            [Option('x', "exclude_prefix", Required = false, DefaultValue = "", HelpText = "exclude sheet or column start with specified prefix.")]
-            public string ExcludePrefix {
+            [Option('x', "include_prefix", Required = false, DefaultValue = "", HelpText = "include column start with specified prefix.")]
+            public string IncludePrefix {
                 get;
                 set;
             }

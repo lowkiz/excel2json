@@ -21,6 +21,7 @@ namespace excel2json.GUI
         // 支持语法高亮的文本框
         private FastColoredTextBox mJsonTextBox;
         private FastColoredTextBox mCSharpTextBox;
+        private FastColoredTextBox mGoTextBox;
 
 
         // 文本框的样式
@@ -48,6 +49,9 @@ namespace excel2json.GUI
 
             mCSharpTextBox = createTextBoxInTab(this.tabCSharp);
             mCSharpTextBox.Language = Language.CSharp;
+
+            mGoTextBox = createTextBoxInTab(this.tabGo);
+            mGoTextBox.Language = Language.Custom;
 
             //-- componet init states
             this.comboBoxType.SelectedIndex = 0;
@@ -143,7 +147,7 @@ namespace excel2json.GUI
             options.HeaderRows = int.Parse(this.comboBoxHeader.Text);
             options.DateFormat = this.comboBoxDateFormat.Text;
             options.ForceSheetName = this.comboBoxSheetName.SelectedIndex == 0;
-            options.ExcludePrefix = this.textBoxExculdePrefix.Text;
+            options.IncludePrefix = this.textBoxExculdePrefix.Text;
             options.CellJson = this.checkBoxCellJson.Checked;
             options.AllString = this.checkBoxAllString.Checked;
 
@@ -227,6 +231,7 @@ namespace excel2json.GUI
 
                 mJsonTextBox.Text = mDataMgr.JsonContext;
                 mCSharpTextBox.Text = mDataMgr.CSharpCode;
+                mGoTextBox.Text = mDataMgr.GoCode;
 
                 enableExportButtons(true);
             }

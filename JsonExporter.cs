@@ -25,7 +25,7 @@ namespace excel2json
         /// 构造函数：完成内部数据创建
         /// </summary>
         /// <param name="excel">ExcelLoader Object</param>
-        public JsonExporter(ExcelLoader excel, bool lowcase, bool exportArray, string dateFormat, bool forceSheetName, int headerRows, string excludePrefix, bool cellJson, bool allString)
+        public JsonExporter(ExcelLoader excel, bool lowcase, bool exportArray, string dateFormat, bool forceSheetName, int headerRows, string includePrefix, bool cellJson, bool allString)
         {
             mHeaderRows = headerRows - 1;
             List<DataTable> validSheets = new List<DataTable>();
@@ -35,7 +35,7 @@ namespace excel2json
 
                 // 过滤掉包含特定前缀的表单
                 string sheetName = sheet.TableName;
-                if (excludePrefix.Length > 0 && sheetName.StartsWith(excludePrefix))
+                if (Program.NeedExclude(sheetName))
                     continue;
 
                 if (sheet.Columns.Count > 0 && sheet.Rows.Count > 0)
@@ -52,7 +52,7 @@ namespace excel2json
             {   // single sheet
 
                 //-- convert to object
-                object sheetValue = convertSheet(validSheets[0], exportArray, lowcase, excludePrefix, cellJson, allString);
+                object sheetValue = convertSheet(validSheets[0], exportArray, lowcase, includePrefix, cellJson, allString);
                 //-- convert to json string
                 mContext = JsonConvert.SerializeObject(sheetValue, jsonSettings);
             }
@@ -62,7 +62,7 @@ namespace excel2json
                 Dictionary<string, object> data = new Dictionary<string, object>();
                 foreach (var sheet in validSheets)
                 {
-                    object sheetValue = convertSheet(sheet, exportArray, lowcase, excludePrefix, cellJson, allString);
+                    object sheetValue = convertSheet(sheet, exportArray, lowcase, includePrefix, cellJson, allString);
                     data.Add(sheet.TableName, sheetValue);
                 }
 
@@ -124,15 +124,16 @@ namespace excel2json
         /// <summary>
         /// 把一行数据转换成一个对象，每一列是一个属性
         /// </summary>
-        private Dictionary<string, object> convertRowToDict(DataTable sheet, DataRow row, bool lowcase, int firstDataRow, string excludePrefix, bool cellJson, bool allString)
+        private Dictionary<string, object> convertRowToDict(DataTable sheet, DataRow row, bool lowcase, int firstDataRow, string includePrefix, bool cellJson, bool allString)
         {
             var rowData = new Dictionary<string, object>();
             int col = 0;
+            DataRow exportRow = sheet.Rows[1];
             foreach (DataColumn column in sheet.Columns)
             {
                 // 过滤掉包含指定前缀的列
                 string columnName = column.ToString();
-                if (excludePrefix.Length > 0 && columnName.StartsWith(excludePrefix))
+                if (includePrefix.Length == 0 || !exportRow[column].ToString().Contains(includePrefix))
                     continue;
 
                 object value = row[column];

@@ -3,6 +3,7 @@ using System.IO;
 using System.Data;
 using System.Text;
 using System.Windows.Forms;
+using System.Xml.Linq;
 
 
 namespace excel2json
@@ -106,15 +107,30 @@ namespace excel2json
             ExcelLoader excel = new ExcelLoader(excelPath, header);
 
             //-- export
-            JsonExporter exporter = new JsonExporter(excel, options.Lowcase, options.ExportArray, dateFormat, options.ForceSheetName, header, options.ExcludePrefix, options.CellJson, options.AllString);
+            JsonExporter exporter = new JsonExporter(excel, options.Lowcase, options.ExportArray, dateFormat, options.ForceSheetName, header, options.IncludePrefix, options.CellJson, options.AllString);
             exporter.SaveToFile(exportPath, cd);
 
             //-- 生成C#定义文件
             if (options.CSharpPath != null && options.CSharpPath.Length > 0)
             {
-                CSDefineGenerator generator = new CSDefineGenerator(excelName, excel, options.ExcludePrefix);
+                CSDefineGenerator generator = new CSDefineGenerator(excelName, excel, options.IncludePrefix);
                 generator.SaveToFile(options.CSharpPath, cd);
             }
+            //-- 生成Go定义文件
+            if (options.GoPath != null && options.GoPath.Length > 0)
+            {
+                GoDefineGenerator generator = new GoDefineGenerator(excelName, excel, options.IncludePrefix);
+                generator.SaveToFile(options.GoPath, cd);
+            }
+        }
+
+        public static bool NeedExclude(string name,string excludeSymbol = "#")
+        {
+            if(excludeSymbol.Length > 0 && name.StartsWith(excludeSymbol))
+            {
+                return true;
+            }
+            return false;
         }
     }
 }

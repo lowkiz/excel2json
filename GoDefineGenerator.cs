@@ -4,13 +4,10 @@ using System.Data;
 using System.Text;
 using System.Collections.Generic;
 
+
 namespace excel2json
 {
-    /// <summary>
-    /// 根据表头，生成C#类定义数据结构
-    /// 表头使用三行定义：字段名称、字段类型、注释
-    /// </summary>
-    class CSDefineGenerator
+    class GoDefineGenerator
     {
         struct FieldDef
         {
@@ -21,13 +18,15 @@ namespace excel2json
 
         string mCode;
 
-        public string code {
-            get {
+        public string code
+        {
+            get
+            {
                 return this.mCode;
             }
         }
 
-        public CSDefineGenerator(string excelName, ExcelLoader excel, string excludePrefix)
+        public GoDefineGenerator(string excelName, ExcelLoader excel, string excludePrefix)
         {
             //-- 创建代码字符串
             StringBuilder sb = new StringBuilder();
@@ -39,6 +38,8 @@ namespace excel2json
             sb.AppendLine();
             sb.AppendFormat("// Generate From {0}.xlsx", excelName);
             sb.AppendLine();
+            sb.AppendLine();
+            sb.AppendLine("package config");
             sb.AppendLine();
 
             for (int i = 0; i < excel.Sheets.Count; i++)
@@ -70,7 +71,6 @@ namespace excel2json
 
             foreach (DataColumn column in sheet.Columns)
             {
-                // 过滤掉包含指定前缀的列
                 if (includePrefix.Length == 0 || !exportRow[column].ToString().Contains(includePrefix))
                     continue;
 
@@ -84,12 +84,12 @@ namespace excel2json
 
             // export as string
             StringBuilder sb = new StringBuilder();
-            sb.AppendFormat("public class {0}\r\n{{", sheet.TableName);
+            sb.AppendFormat("type {0} struct {{", sheet.TableName);
             sb.AppendLine();
 
             foreach (FieldDef field in fieldList)
             {
-                sb.AppendFormat("\tpublic {0} {1}; // {2}", field.type, field.name, field.comment);
+                sb.AppendFormat("\t{0} {1} `json:'{2}'`// {3}", field.name, field.type, field.name, field.comment);
                 sb.AppendLine();
             }
 
