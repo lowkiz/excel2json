@@ -101,8 +101,8 @@ namespace excel2json
         /// </summary>
         private object convertSheetToDict(DataTable sheet, bool lowcase, string excludePrefix, bool cellJson, bool allString)
         {
-            Dictionary<string, object> importData =
-                new Dictionary<string, object>();
+            Dictionary<int, object> importData =
+                new Dictionary<int, object>();
 
             int firstDataRow = mHeaderRows;
             for (int i = firstDataRow; i < sheet.Rows.Count; i++)
@@ -115,7 +115,7 @@ namespace excel2json
                 var rowObject = convertRowToDict(sheet, row, lowcase, firstDataRow, excludePrefix, cellJson, allString);
                 // 多余的字段
                 // rowObject[ID] = ID;
-                importData[ID] = rowObject;
+                importData[int.Parse(ID)] = rowObject;
             }
 
             return importData;

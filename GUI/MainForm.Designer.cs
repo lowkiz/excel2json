@@ -413,6 +413,7 @@
             this.textBoxExculdePrefix.Name = "textBoxExculdePrefix";
             this.textBoxExculdePrefix.Size = new System.Drawing.Size(272, 31);
             this.textBoxExculdePrefix.TabIndex = 14;
+            this.textBoxExculdePrefix.Text = "CS";
             // 
             // comboBoxSheetName
             // 
@@ -475,7 +476,6 @@
             this.comboBoxHeader.DisplayMember = "0";
             this.comboBoxHeader.FormattingEnabled = true;
             this.comboBoxHeader.Items.AddRange(new object[] {
-            "2",
             "3",
             "4",
             "5",

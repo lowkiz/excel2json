@@ -12,7 +12,6 @@ namespace excel2json
         struct FieldDef
         {
             public string name;
-            public string type;
             public string comment;
         }
 
@@ -39,7 +38,7 @@ namespace excel2json
             sb.AppendFormat("// Generate From {0}.xlsx", excelName);
             sb.AppendLine();
             sb.AppendLine();
-            sb.AppendLine("package config");
+            sb.AppendLine("package generated");
             sb.AppendLine();
 
             for (int i = 0; i < excel.Sheets.Count; i++)
@@ -65,7 +64,6 @@ namespace excel2json
 
             // get field list
             List<FieldDef> fieldList = new List<FieldDef>();
-            DataRow typeRow = sheet.Rows[0];
             DataRow exportRow = sheet.Rows[1];
             DataRow commentRow = sheet.Rows[2];
 
@@ -76,7 +74,6 @@ namespace excel2json
 
                 FieldDef field;
                 field.name = column.ToString();
-                field.type = typeRow[column].ToString();
                 field.comment = commentRow[column].ToString();
 
                 fieldList.Add(field);
@@ -84,18 +81,36 @@ namespace excel2json
 
             // export as string
             StringBuilder sb = new StringBuilder();
-            sb.AppendFormat("type {0} struct {{", sheet.TableName);
+            sb.AppendFormat("type {0} struct {{", sheet.TableName+"Data");
             sb.AppendLine();
 
             foreach (FieldDef field in fieldList)
             {
-                sb.AppendFormat("\t{0} {1} `json:'{2}'`// {3}", field.name, field.type, field.name, field.comment);
+                sb.AppendFormat("\t{0} {1} // {2}", field.name, "string", field.comment);
                 sb.AppendLine();
             }
 
             sb.Append('}');
             sb.AppendLine();
             sb.AppendLine();
+            sb.Append(_exportSheetVar(sheet.TableName, fieldList));
+            return sb.ToString();
+        }
+
+        private string _exportSheetVar(string sheetName, List<FieldDef> fieldList)
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine("var (");
+            sb.AppendFormat("\t{0} = &{1}{{", sheetName, sheetName+"Data");
+            sb.AppendLine();
+            foreach (FieldDef field in fieldList)
+            {
+                sb.AppendFormat("\t\t{0}: \"{1}\",", field.name, field.name);
+                sb.AppendLine();
+            }
+            sb.Append('}');
+            sb.AppendLine();
+            sb.AppendLine(")");
             return sb.ToString();
         }
 
