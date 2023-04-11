@@ -49,12 +49,19 @@ namespace excel2json
             };
 
             if (!forceSheetName && validSheets.Count == 1)
-            {   // single sheet
-
-                //-- convert to object
-                object sheetValue = convertSheet(validSheets[0], exportArray, lowcase, includePrefix, cellJson, allString);
-                //-- convert to json string
-                mContext = JsonConvert.SerializeObject(sheetValue, jsonSettings);
+            {   // single 
+                if(validSheets[0].TableName == "Global")
+                {
+                    mContext = convertSheetToString(validSheets[0]);
+                }
+                else 
+                {
+                    //-- convert to object
+                    object sheetValue = convertSheet(validSheets[0], exportArray, lowcase, includePrefix, cellJson, allString);
+                    //-- convert to json string
+                    mContext = JsonConvert.SerializeObject(sheetValue, jsonSettings);
+                }
+      
             }
             else
             { // mutiple sheet
@@ -119,6 +126,35 @@ namespace excel2json
             }
 
             return importData;
+        }
+
+        private string convertSheetToString(DataTable sheet)
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.Append("{");
+            sb.AppendLine();
+
+            int firstDataRow = mHeaderRows;
+            for (int i = firstDataRow; i < sheet.Rows.Count; i++)
+            {
+                DataRow row = sheet.Rows[i];
+                string ID = row[sheet.Columns[0]].ToString();
+                object value = row[sheet.Columns[1]];
+
+                if (ID.Length <= 0)
+                    ID = string.Format("row_{0}", i);
+
+                sb.Append("\t\"" + ID + "\"");
+                sb.Append(":");
+                sb.Append(value.ToString());
+                if (i < sheet.Rows.Count - 1)
+                {
+                    sb.Append(",");
+                }
+                sb.AppendLine();
+            }
+            sb.Append('}');
+            return sb.ToString(); ;
         }
 
         /// <summary>

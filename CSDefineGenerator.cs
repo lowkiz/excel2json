@@ -16,7 +16,16 @@ namespace excel2json
         {
             public string name;
             public string type;
+            public string value;
             public string comment;
+
+            public bool isArray 
+            { 
+                get
+                {
+                    return type.EndsWith("[]");
+                } 
+            }
         }
 
         string mCode;
@@ -44,13 +53,70 @@ namespace excel2json
             for (int i = 0; i < excel.Sheets.Count; i++)
             {
                 DataTable sheet = excel.Sheets[i];
-                sb.Append(_exportSheet(sheet, excludePrefix));
+                if(sheet.TableName == "Global")
+                {
+                    sb.Append(_exportGlobal(sheet));
+                }
+                else
+                {
+                    sb.Append(_exportSheet(sheet, excludePrefix));
+                }
             }
 
             sb.AppendLine();
             sb.AppendLine("// End of Auto Generated Code");
 
             mCode = sb.ToString();
+        }
+
+        private string _exportGlobal(DataTable sheet)
+        {
+            if (sheet.Columns.Count < 0 || sheet.Rows.Count < 2)
+                return "";
+
+            string sheetName = sheet.TableName;
+            if (Program.NeedExclude(sheetName))
+                return "";
+
+            // get field list
+            List<FieldDef> fieldList = new List<FieldDef>();
+
+            int firstDataRow = 3;
+            for (int i = firstDataRow; i < sheet.Rows.Count; i++)
+            {
+                DataRow row = sheet.Rows[i];
+
+                FieldDef field;
+                field.name = row[sheet.Columns[0]].ToString();
+                field.value = row[sheet.Columns[1]].ToString();
+                field.type = row[sheet.Columns[2]].ToString();
+                field.comment = row[sheet.Columns[3]].ToString();
+                fieldList.Add(field);
+            }
+
+            // export as string
+            StringBuilder sb = new StringBuilder();
+            sb.AppendFormat("public static class {0}\r\n{{", sheet.TableName);
+            sb.AppendLine();
+
+            foreach (FieldDef field in fieldList)
+            {
+                if (field.isArray)
+                {
+                    sb.AppendFormat("\tpublic static {0} {1} = new {2}{{{3}}}; // {4}", field.type, field.name, field.type,field.value.Trim('[',']'), field.comment);
+                }
+                else
+                {
+                    sb.AppendFormat("\tpublic static {0} {1} = {2}; // {3}", field.type, field.name,field.value, field.comment);
+                }
+                
+                sb.AppendLine();
+            }
+
+            sb.Append('}');
+            sb.AppendLine();
+            sb.AppendLine();
+            return sb.ToString();
         }
 
         private string _exportSheet(DataTable sheet, string includePrefix)
@@ -78,6 +144,7 @@ namespace excel2json
                 field.name = column.ToString();
                 field.type = typeRow[column].ToString();
                 field.comment = commentRow[column].ToString();
+                field.value = "";
 
                 fieldList.Add(field);
             }
