@@ -35,7 +35,7 @@ namespace excel2json
 
                 // 过滤掉包含特定前缀的表单
                 string sheetName = sheet.TableName;
-                if (Program.NeedExclude(sheetName))
+                if (Program.NeedExclude(sheetName) || sheetName == "Global")
                     continue;
 
                 if (sheet.Columns.Count > 0 && sheet.Rows.Count > 0)
@@ -49,19 +49,12 @@ namespace excel2json
             };
 
             if (!forceSheetName && validSheets.Count == 1)
-            {   // single 
-                if(validSheets[0].TableName == "Global")
-                {
-                    mContext = convertSheetToString(validSheets[0]);
-                }
-                else 
-                {
-                    //-- convert to object
-                    object sheetValue = convertSheet(validSheets[0], exportArray, lowcase, includePrefix, cellJson, allString);
-                    //-- convert to json string
-                    mContext = JsonConvert.SerializeObject(sheetValue, jsonSettings);
-                }
-      
+            {
+                //-- convert to object
+                object sheetValue = convertSheet(validSheets[0], exportArray, lowcase, includePrefix, cellJson, allString);
+                //-- convert to json string
+                mContext = JsonConvert.SerializeObject(sheetValue, jsonSettings);
+
             }
             else
             { // mutiple sheet
@@ -250,6 +243,8 @@ namespace excel2json
         /// <param name="jsonPath">输出文件路径</param>
         public void SaveToFile(string filePath, Encoding encoding)
         {
+            if (string.IsNullOrEmpty(mContext) || mContext == "{}")
+                return;
             //-- 保存文件
             using (FileStream file = new FileStream(filePath, FileMode.Create, FileAccess.Write))
             {
