@@ -151,7 +151,7 @@ namespace excel2json
 
             // export as string
             StringBuilder sb = new StringBuilder();
-            sb.AppendFormat("public partial class {0}\r\n{{", sheet.TableName);
+            sb.AppendFormat("public partial class {0} : IGeneratedConfig\r\n{{", sheet.TableName);
             sb.AppendLine();
 
             foreach (FieldDef field in fieldList)
